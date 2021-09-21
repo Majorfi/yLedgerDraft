@@ -9,11 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ledgerhq/hw-transport-u2f": "^5.36.0-deprecated",
+    "@ledgerhq/hw-transport-webusb": "^6.7.0",
     "@ledgerhq/iframe-provider": "^0.4.2",
+    "bnc-onboard": "^1.34.2",
     "ethers": "^5.4.7",
     "next": "11.1.2",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "web3": "^1.5.2"
   },
   "devDependencies": {
     "eslint": "7.32.0",
