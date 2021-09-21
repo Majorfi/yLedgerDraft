@@ -11,10 +11,10 @@ const wallets = [
 	{walletName: 'metamask', preferred: true},
 	{
 		walletName: 'ledger',
-		rpcUrl: `https://eth-mainnet.alchemyapi.io/v2/${process.env.INFURA_KEY}`,
+		rpcUrl: 'http://localhost:8545',
+		// rpcUrl: `https://eth-mainnet.alchemyapi.io/v2/${process.env.INFURA_KEY}`,
 		preferred: true,
-	},
-	{walletName: 'frame', preferred: true},
+	}
 ];
 
 const walletChecks = [
@@ -34,13 +34,14 @@ const onboard = Onboard({
 	subscriptions: {
 		wallet: wallet => {
 			web3 = new Web3(wallet.provider);
+			web3 = new ethers.providers.Web3Provider(web3.givenProvider || web3.currentProvider);
 		}
 	}
 });
 
 
 const  ETH_VAULT = '0xa258C4606Ca8206D8aA700cE2143D7db854D168c';
-async function	approveVault({provider, contractAddress, amount}, callback) {
+async function	approveVault({provider, contractAddress, amount}, callback = () => null) {
 	const	signer = provider.getSigner();
 	const	contract = new ethers.Contract(
 		contractAddress,
@@ -64,7 +65,7 @@ async function	approveVault({provider, contractAddress, amount}, callback) {
 		callback({error, data: undefined});
 	}
 }
-async function	apeInVault({provider, contractAddress, amount}, callback) {
+async function	apeInVault({provider, contractAddress, amount}, callback = () => null) {
 	const	signer = provider.getSigner();
 	const	contract = new ethers.Contract(
 		contractAddress,
@@ -101,9 +102,8 @@ export default function Home() {
 			stepSuccess = await onboard.walletCheck();
 			if (stepSuccess) {
 				const currentState = onboard.getState();
-				if (currentState) {
-					set_balance(ethers.utils.formatEther(currentState.balance));
-				}
+				set_balance(ethers.utils.formatEther(currentState.balance));
+				set_provider(web3);
 			}
 		}
 	}
@@ -118,14 +118,13 @@ export default function Home() {
 	}, [typeof(window) !== 'undefined']);
 
 	useEffect(() => {
-		if (ethereum) {
+		if (ethereum && isIframe) {
 			const web3Provider = new ethers.providers.Web3Provider(ethereum);
 			set_provider(web3Provider);
-
 			const signer = web3Provider.getSigner();
 			signer.getBalance().then(e => set_balance(ethers.utils.formatEther(e)));
 		}
-	}, [ethereum]);
+	}, [ethereum, isIframe]);
 
 	if (isIframe) {
 		ethereum?.on('accountsChanged', function (accounts) {
